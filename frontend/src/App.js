@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Register from './components/Register';
 import Login from './components/Login';
 import Home from './components/Home';
+import PaymentSuccess from './components/PaymentSuccess';
 import PaymentRequest from './components/PaymentRequest';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={isAuthenticated() ? <Home /> : <Navigate to="/login" />} />
         <Route path="/payment-request" element={isAuthenticated() ? <PaymentRequest /> : <Navigate to="/login" />} />
+        <Route path="/payment-success" element={isAuthenticated() ? <PaymentSuccess /> : <Navigate to="/login" />} />  
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

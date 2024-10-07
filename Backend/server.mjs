@@ -1,4 +1,4 @@
-import http from "http";
+import http from "http";  // Use https instead of http
 import fs from "fs";
 import users from "./Routes/user.mjs";
 import payments from "./Routes/payment.mjs";  // Payment request routes
@@ -8,14 +8,35 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import session from 'express-session';
 import hpp from "hpp";
+//code attribution:
+
+//Author: Helmet.js Contributors
+//Title: Helmet.js Documentation
+//Available at: https://helmetjs.github.io/
+
+//Author: Express Rate Limit Maintainers
+//Title: Express Rate Limit Documentation
+//Available at: https://www.npmjs.com/package/express-rate-limit
+
+//Author: HPP Maintainers
+//Title: HPP Middleware for Express Documentation
+//Available at: https://www.npmjs.com/package/hpp
+
+//Author: Express.js Team
+//Title: Express Session Middleware
+//Available at: https://www.npmjs.com/package/express-session
+
+//Author:  OWASP Foundation
+//Title: OWASP Input Validation Cheat Sheet
+//Available at: https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
 
 const PORT = 3000;
 const app = express();
 
 // SSL Certificates for HTTPS
 const options = {
-    key: fs.readFileSync('keys/privatekey.pem'),
-    cert: fs.readFileSync('keys/certificate.pem')
+    key: fs.readFileSync('keys/privatekey.pem'),  // Path to private key
+    cert: fs.readFileSync('keys/certificate.pem') // Path to certificate
 };
 
 // Middleware for security headers
@@ -23,7 +44,7 @@ app.use(helmet());
 
 // Simplified CORS settings
 app.use(cors({
-  origin: "http://localhost:3001",  // Allow requests from your frontend at this address
+  origin: "http://localhost:3001",  
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -33,8 +54,8 @@ app.use(express.json());
 
 // Rate limiting to prevent DDoS attacks
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // Limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, 
+    max: 100 
 });
 app.use(limiter);
 
@@ -46,7 +67,7 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true, httpOnly: true, maxAge: 60000 }  // Secure, HTTP only, with expiry
+  cookie: { secure: true, httpOnly: true, maxAge: 60000 } 
 }));
 
 // Routes for users and payments
@@ -54,7 +75,7 @@ app.use("/user", users);
 app.use("/payment", payments);  // Payment request routes
 
 // HTTPS Server Setup
-let server = http.createServer(app);  
+let server = http.createServer(options, app);  
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running securely on http://localhost:${PORT}`);
 });
