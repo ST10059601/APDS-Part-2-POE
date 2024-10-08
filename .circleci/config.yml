@@ -67,6 +67,25 @@ jobs:
           path: ~/artifacts/backend
           destination: backend-build
 
+  sonarqube:
+    working_directory: ~/project
+    docker:
+      - image: sonarsource/sonar-scanner-cli
+    steps:
+      - checkout
+      - run:
+          name: Run SonarQube scan
+          command: |
+            SONAR_BRANCH="${CIRCLE_BRANCH:-master}"
+            sonar-scanner \
+              -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+              -Dsonar.organization="$SONAR_ORG" \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.exclusions="**/android/**,**/ios/**" \
+              -Dsonar.login="$SONAR_TOKEN" \
+              -Dsonar.branch.name="$SONAR_BRANCH" \
+              -Dsonar.sources="."
+
 workflows:
   build-and-test:
     jobs:
@@ -78,3 +97,7 @@ workflows:
       - build-backend:
           requires:
             - test-backend
+      - sonarqube:
+          requires:
+            - build-frontend
+            - build-backend
