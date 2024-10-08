@@ -1,52 +1,35 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
-import { MemoryRouter } from 'react-router-dom';
 
 test('renders login page by default', () => {
-  render(
-    <MemoryRouter initialEntries={['/']}>
-      <App />
-    </MemoryRouter>
-  );
-  
-  const loginHeading = screen.getByText(/login/i);  // Look for "Login" text in the DOM
-  expect(loginHeading).toBeInTheDocument();  // Ensure it's in the document
+  render(<App />);  // Remove MemoryRouter since App already has a Router
+  const loginHeading = screen.getByText(/login/i);
+  expect(loginHeading).toBeInTheDocument();
 });
 
 test('renders register page', () => {
-  render(
-    <MemoryRouter initialEntries={['/register']}>
-      <App />
-    </MemoryRouter>
-  );
+  window.history.pushState({}, 'Register Test', '/register');  // Mock navigation to /register
 
-  const registerHeading = screen.getByText(/register/i);  // Look for "Register" text in the DOM
-  expect(registerHeading).toBeInTheDocument();  // Ensure it's in the document
+  render(<App />);
+  const registerHeading = screen.getByText(/register/i);
+  expect(registerHeading).toBeInTheDocument();
 });
 
 test('renders home page when authenticated', () => {
   localStorage.setItem('token', 'dummy_token');  // Mock authentication by adding a token
+  window.history.pushState({}, 'Home Test', '/home');  // Mock navigation to /home
 
-  render(
-    <MemoryRouter initialEntries={['/home']}>
-      <App />
-    </MemoryRouter>
-  );
-
-  const homeHeading = screen.getByText(/welcome to the payment portal/i);  // Check for Home component content
-  expect(homeHeading).toBeInTheDocument();  // Ensure it's in the document
+  render(<App />);
+  const homeHeading = screen.getByText(/welcome to the payment portal/i);
+  expect(homeHeading).toBeInTheDocument();
   localStorage.removeItem('token');  // Clean up
 });
 
 test('redirects to login if not authenticated', () => {
   localStorage.removeItem('token');  // Ensure no authentication token is present
+  window.history.pushState({}, 'Home Test', '/home');  // Mock navigation to /home
 
-  render(
-    <MemoryRouter initialEntries={['/home']}>
-      <App />
-    </MemoryRouter>
-  );
-
-  const loginHeading = screen.getByText(/login/i);  // Since not authenticated, it should redirect to login
-  expect(loginHeading).toBeInTheDocument();  // Ensure it's in the document
+  render(<App />);
+  const loginHeading = screen.getByText(/login/i);
+  expect(loginHeading).toBeInTheDocument();
 });
