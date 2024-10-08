@@ -6,11 +6,12 @@ jobs:
   # Frontend test job
   test-frontend:
     executor: node/default
-    working_directory: ~/project/frontend
+    working_directory: ~/project/frontend  # Set working directory to frontend
     steps:
       - checkout:
           path: ~/project
       - node/install-packages:
+          app-dir: ~/project/frontend  # Ensure app-dir points to frontend
           pkg-manager: npm
       - run:
           name: Run frontend tests
@@ -24,6 +25,7 @@ jobs:
       - checkout:
           path: ~/project
       - node/install-packages:
+          app-dir: ~/project/frontend  # Ensure app-dir points to frontend
           pkg-manager: npm
       - run:
           command: npm run build
@@ -40,11 +42,12 @@ jobs:
   # Backend test job
   test-backend:
     executor: node/default
-    working_directory: ~/project/backend
+    working_directory: ~/project/Backend  # Set working directory to Backend (capital B)
     steps:
       - checkout:
           path: ~/project
       - node/install-packages:
+          app-dir: ~/project/Backend  # Ensure app-dir points to Backend (capital B)
           pkg-manager: npm
       - run:
           name: Run backend tests
@@ -53,11 +56,12 @@ jobs:
   # Backend build job (if applicable)
   build-backend:
     executor: node/default
-    working_directory: ~/project/backend
+    working_directory: ~/project/Backend  # Set working directory to Backend (capital B)
     steps:
       - checkout:
           path: ~/project
       - node/install-packages:
+          app-dir: ~/project/Backend  # Ensure app-dir points to Backend (capital B)
           pkg-manager: npm
       - run:
           command: npm run build
