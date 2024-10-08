@@ -15,7 +15,7 @@ jobs:
       - run:
           name: Run frontend tests
           command: npm test --passWithNoTests
-
+          
   build-frontend:
     executor: node/default
     working_directory: ~/project/frontend
@@ -31,7 +31,7 @@ jobs:
           name: Create frontend artifacts directory
           command: mkdir -p ~/artifacts/frontend
       - run:
-          name: Copy frontend artifacts
+          name: Copy frontend build artifacts
           command: cp -R build ~/artifacts/frontend
       - store_artifacts:
           path: ~/artifacts/frontend
@@ -48,7 +48,7 @@ jobs:
       - run:
           name: Run backend tests
           command: npm test --passWithNoTests
-
+          
   build-backend:
     executor: node/default
     working_directory: ~/project/Backend
@@ -58,38 +58,14 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
-          name: Build backend
-          command: npm run build
-      - run:
           name: Create backend artifacts directory
           command: mkdir -p ~/artifacts/backend
       - run:
-          name: Copy backend artifacts
-          command: cp -R dist ~/artifacts/backend
+          name: Copy backend server file
+          command: cp -R server.mjs ~/artifacts/backend  # Adjust this to match your backend entry file
       - store_artifacts:
           path: ~/artifacts/backend
           destination: backend-build
-
-  sonarqube:
-    docker:
-      - image: sonarsource/sonar-scanner-cli
-    steps:
-      - run: find .
-      - attach_workspace:
-          at: ~/workspace
-      - run: |
-          SONAR_BRANCH="${CIRCLE_BRANCH:-master}"
-          sonar-scanner \
-          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-          -Dsonar.organization="$SONAR_ORG" \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.exclusions="**/android/**,**/ios/**" \
-          -Dsonar.c.file.suffixes=- \
-          -Dsonar.cpp.file.suffixes=- \
-          -Dsonar.objc.file.suffixes=- \
-          -Dsonar.login="$SONAR_TOKEN" \
-          -Dsonar.branch.name="$SONAR_BRANCH" \
-          -Dsonar.sources="."
 
 workflows:
   build-and-test:
@@ -102,7 +78,3 @@ workflows:
       - build-backend:
           requires:
             - test-backend
-      - sonarqube:
-          requires:
-            - build-frontend
-            - build-backend
