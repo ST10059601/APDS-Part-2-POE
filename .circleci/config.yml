@@ -39,7 +39,7 @@ jobs:
 
   test-backend:
     executor: node/default
-    working_directory: ~/project/backend
+    working_directory: ~/project/Backend
     steps:
       - checkout:
           path: ~/project
@@ -51,7 +51,7 @@ jobs:
 
   build-backend:
     executor: node/default
-    working_directory: ~/project/backend
+    working_directory: ~/project/Backend
     steps:
       - checkout:
           path: ~/project
