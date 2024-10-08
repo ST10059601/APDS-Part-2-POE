@@ -5,7 +5,8 @@
   "main": "server.mjs",
   "scripts": {
     "start": "node server",
-    "dev": "nodemon server"
+    "dev": "nodemon server",
+    "test": "echo \"No tests specified\" && exit 0"  // Placeholder for test script
   },
   "keywords": [],
   "author": "",
