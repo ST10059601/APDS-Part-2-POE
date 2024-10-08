@@ -4,7 +4,7 @@ orbs:
   node: circleci/node@5
 
 jobs:
-  test-node:
+  test-frontend:
     executor: node/default
     working_directory: ~/project/frontend
     steps:
@@ -13,10 +13,10 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
-          name: Run tests
+          name: Run frontend tests
           command: npm test --passWithNoTests
 
-  build-node:
+  build-frontend:
     executor: node/default
     working_directory: ~/project/frontend
     steps:
@@ -25,16 +25,50 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
+          name: Build frontend
           command: npm run build
       - run:
-          name: Create the ~/artifacts directory if it doesn't exist
-          command: mkdir -p ~/artifacts
+          name: Create frontend artifacts directory
+          command: mkdir -p ~/artifacts/frontend
       - run:
-          name: Copy artifacts
-          command: cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
+          name: Copy frontend artifacts
+          command: cp -R build ~/artifacts/frontend
       - store_artifacts:
-          path: ~/artifacts
-          destination: node-build
+          path: ~/artifacts/frontend
+          destination: frontend-build
+
+  test-backend:
+    executor: node/default
+    working_directory: ~/project/backend
+    steps:
+      - checkout:
+          path: ~/project
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Run backend tests
+          command: npm test --passWithNoTests
+
+  build-backend:
+    executor: node/default
+    working_directory: ~/project/backend
+    steps:
+      - checkout:
+          path: ~/project
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Build backend
+          command: npm run build
+      - run:
+          name: Create backend artifacts directory
+          command: mkdir -p ~/artifacts/backend
+      - run:
+          name: Copy backend artifacts
+          command: cp -R dist ~/artifacts/backend
+      - store_artifacts:
+          path: ~/artifacts/backend
+          destination: backend-build
 
   sonarqube:
     docker:
@@ -60,10 +94,15 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - test-node
-      - build-node:
+      - test-frontend
+      - build-frontend:
           requires:
-            - test-node
+            - test-frontend
+      - test-backend
+      - build-backend:
+          requires:
+            - test-backend
       - sonarqube:
           requires:
-            - build-node
+            - build-frontend
+            - build-backend
