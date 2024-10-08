@@ -1,72 +1,49 @@
 version: 2.1
 
-orbs:
-  node: circleci/node@5
+executors:
+  node-executor:
+    docker:
+      - image: circleci/node:14
+    working_directory: ~/project
 
 jobs:
-  test-frontend:
-    executor: node/default
-    working_directory: ~/project/frontend
-    steps:
-      - checkout:
-          path: ~/project
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          name: Run frontend tests
-          command: npm test --passWithNoTests
-          
-  build-frontend:
-    executor: node/default
-    working_directory: ~/project/frontend
-    steps:
-      - checkout:
-          path: ~/project
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          name: Build frontend
-          command: npm run build
-      - run:
-          name: Create frontend artifacts directory
-          command: mkdir -p ~/artifacts/frontend
-      - run:
-          name: Copy frontend build artifacts
-          command: cp -R build ~/artifacts/frontend
-      - store_artifacts:
-          path: ~/artifacts/frontend
-          destination: frontend-build
-
-  test-backend:
-    executor: node/default
-    working_directory: ~/project/Backend
-    steps:
-      - checkout:
-          path: ~/project
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          name: Run backend tests
-          command: npm test --passWithNoTests
-          
+  # Backend job
   build-backend:
-    executor: node/default
-    working_directory: ~/project/Backend
+    executor: node-executor
     steps:
-      - checkout:
-          path: ~/project
-      - node/install-packages:
-          pkg-manager: npm
+      - checkout
       - run:
-          name: Create backend artifacts directory
-          command: mkdir -p ~/artifacts/backend
+          name: Install Backend Dependencies
+          working_directory: ~/project/Backend
+          command: npm install
       - run:
-          name: Copy backend server file
-          command: cp -R server.mjs ~/artifacts/backend  # Adjust this to match your backend entry file
-      - store_artifacts:
-          path: ~/artifacts/backend
-          destination: backend-build
+          name: Run Backend Tests
+          working_directory: ~/project/Backend
+          command: npm test
+      - run:
+          name: Build Backend
+          working_directory: ~/project/Backend
+          command: npm run build
 
+  # Frontend job
+  build-frontend:
+    executor: node-executor
+    steps:
+      - checkout
+      - run:
+          name: Install Frontend Dependencies
+          working_directory: ~/project/frontend
+          command: npm install
+      - run:
+          name: Run Frontend Tests
+          working_directory: ~/project/frontend
+          command: npm test
+      - run:
+          name: Build Frontend
+          working_directory: ~/project/frontend
+          command: npm run build
+
+  # SonarQube analysis job
   sonarqube:
     working_directory: ~/project
     docker:
@@ -81,23 +58,21 @@ jobs:
               -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
               -Dsonar.organization="$SONAR_ORG" \
               -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.exclusions="**/android/**,**/ios/**" \
-              -Dsonar.login="$SONAR_TOKEN" \
+              -Dsonar.token="$SONAR_TOKEN" \
+              -Dsonar.exclusions="**/android/**,**/ios/**, **/*.c, **/*.cpp, **/*.h, **/*.m" \
+              -Dsonar.c.file.suffixes=- \
+              -Dsonar.cpp.file.suffixes=- \
+              -Dsonar.objc.file.suffixes=- \
               -Dsonar.branch.name="$SONAR_BRANCH" \
               -Dsonar.sources="."
 
 workflows:
-  build-and-test:
+  version: 2
+  build-deploy:
     jobs:
-      - test-frontend
-      - build-frontend:
-          requires:
-            - test-frontend
-      - test-backend
-      - build-backend:
-          requires:
-            - test-backend
+      - build-backend
+      - build-frontend
       - sonarqube:
           requires:
-            - build-frontend
             - build-backend
+            - build-frontend
