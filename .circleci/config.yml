@@ -40,20 +40,20 @@ jobs:
   # Backend test job
   test-backend:
     executor: node/default
-    working_directory: ~/project/Backend
+    working_directory: ~/project/backend
     steps:
       - checkout:
           path: ~/project
       - node/install-packages:
           pkg-manager: npm
       - run:
-          name: Run Backend tests
+          name: Run backend tests
           command: npm test --passWithNoTests
 
   # Backend build job (if applicable)
   build-backend:
     executor: node/default
-    working_directory: ~/project/Backend
+    working_directory: ~/project/backend
     steps:
       - checkout:
           path: ~/project
@@ -99,8 +99,8 @@ workflows:
       - build-frontend:
           requires:
             - test-frontend
-      - test-Backend
+      - test-backend
       - build-backend:
           requires:
-            - test-Backend
+            - test-backend
       - sonarqube
