@@ -2,34 +2,40 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 test('renders login page by default', () => {
-  render(<App />);  // Remove MemoryRouter since App already has a Router
-  const loginHeading = screen.getByText(/login/i);
+  render(<App />);
+  
+  // Targeting the heading with the role "heading" and the name "Login"
+  const loginHeading = screen.getByRole('heading', { name: /login/i });
   expect(loginHeading).toBeInTheDocument();
 });
 
 test('renders register page', () => {
-  window.history.pushState({}, 'Register Test', '/register');  // Mock navigation to /register
-
+  window.history.pushState({}, 'Register Test', '/register');
+  
   render(<App />);
-  const registerHeading = screen.getByText(/register/i);
+  
+  // Targeting the heading with the role "heading" and the name "Register"
+  const registerHeading = screen.getByRole('heading', { name: /register/i });
   expect(registerHeading).toBeInTheDocument();
 });
 
 test('renders home page when authenticated', () => {
-  localStorage.setItem('token', 'dummy_token');  // Mock authentication by adding a token
-  window.history.pushState({}, 'Home Test', '/home');  // Mock navigation to /home
+  localStorage.setItem('token', 'dummy_token');
+  window.history.pushState({}, 'Home Test', '/home');
 
   render(<App />);
+  
   const homeHeading = screen.getByText(/welcome to the payment portal/i);
   expect(homeHeading).toBeInTheDocument();
-  localStorage.removeItem('token');  // Clean up
+  localStorage.removeItem('token');
 });
 
 test('redirects to login if not authenticated', () => {
-  localStorage.removeItem('token');  // Ensure no authentication token is present
-  window.history.pushState({}, 'Home Test', '/home');  // Mock navigation to /home
+  localStorage.removeItem('token');
+  window.history.pushState({}, 'Home Test', '/home');
 
   render(<App />);
-  const loginHeading = screen.getByText(/login/i);
+  
+  const loginHeading = screen.getByRole('heading', { name: /login/i });
   expect(loginHeading).toBeInTheDocument();
 });
