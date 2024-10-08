@@ -66,8 +66,7 @@ jobs:
       - run:
           command: npm run build
 
-  # SonarQube scanning job
-  sonarqube:
+ sonarqube:
   working_directory: ~/build
   docker:
     - image: sonarsource/sonar-scanner-cli
@@ -91,6 +90,7 @@ jobs:
         -Dsonar.login="$SONAR_TOKEN" \
         -Dsonar.branch.name="$SONAR_BRANCH" \
         -Dsonar.sources="."
+
 
 
   # Deployment (example, to be replaced with actual deploy steps)
